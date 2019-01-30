@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/audio">
+        <file alias="pum.wav">audio/pum.wav</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file alias="mirilla2.png">img/mirilla.png</file>
+        <file alias="mirilla.png">img/mirilla2.png</file>
+    </qresource>
+</RCC>
