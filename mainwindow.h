@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QElapsedTimer>
 
 #include "guncon_usb.h"
 #include "calibration.h"
@@ -41,6 +42,7 @@ private:
     bool trigger_act;
     bool uidev_opened;
     Events events;
+    QElapsedTimer time_elapsed;
 };
 
 #endif // MAINWINDOW_H

@@ -178,7 +178,7 @@ void QUsbDevice::flush() {
 }
 
 qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
-  UsbPrintFuncName();
+  //UsbPrintFuncName();
   Q_CHECK_PTR(buf);
   qint32 rc, read_bytes;
   qint32 read_total;
@@ -215,13 +215,13 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
     }
     if (rc == LIBUSB_ERROR_TIMEOUT)
     {
-      qDebug() << "Error timeout";
+//      qDebug() << "Error timeout";
       buf->clear();
       read_total=-1;
     }
     if (rc != LIBUSB_SUCCESS)
     {
-    this->printUsbError(rc);
+    //this->printUsbError(rc);
     return rc;
     }
     return read_total;
@@ -243,7 +243,7 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 len) {
       cmd.append(s.sprintf("%02X:", (uchar)buf->at(i)));
     }
     cmd.remove(cmd.size() - 1, 1);  // remove last colon;
-    qDebug() << "Sending" << len << "bytes:" << cmd;
+    //qDebug() << "Sending" << len << "bytes:" << cmd;
     // qDebug("Sending %ll bytes: %s", maxSize, cmd.toStdString().c_str());
   }
 

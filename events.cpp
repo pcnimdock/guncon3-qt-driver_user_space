@@ -18,11 +18,19 @@ Events::~Events()
 libevdev_uinput_destroy(uidev);
 }
 
-char Events::init_events_joy(int max,int min)
+char Events::init_events_joy(int max,int min,bool cb_4_3)
 {
     struct input_absinfo info;
+    if(cb_4_3)
+    {
+        info.minimum=(max-(4*min)/3)/2;
+        info.maximum=max-(max-(4*min)/3)/2;
+    }
+    else
+    {
     info.minimum=0;
     info.maximum=max;
+    }
     info.resolution=1;
     info.flat=0;
     info.fuzz=0;

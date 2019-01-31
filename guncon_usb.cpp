@@ -177,7 +177,7 @@ void guncon_usb::new_read()
 {
     QByteArray buf;qint16 num_bytes;
     num_bytes=this->read(&buf);
-    qDebug() << "Num bytes readed " << QString::number(num_bytes);
+    //qDebug() << "Num bytes readed " << QString::number(num_bytes);
     if(num_bytes<0){buf.clear();}
     emit(new_readed_data(buf));
 

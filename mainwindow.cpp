@@ -28,6 +28,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::update_data(QByteArray &data)
 {
+    static unsigned char apply_event;
     if(data.isEmpty())
     {
         timer->start();
@@ -37,8 +38,8 @@ void MainWindow::update_data(QByteArray &data)
     {return;}
     QByteArray dec_data = gcon3->decode(data);
 
-    qDebug() << data.toHex().data();
-    qDebug() << dec_data.toHex().data();
+ //   qDebug() << data.toHex().data();
+ //   qDebug() << dec_data.toHex().data();
     if(dec_data.size()<13)
     {return;}
     //transform decode data to buttons
@@ -70,7 +71,7 @@ void MainWindow::update_data(QByteArray &data)
     ui->lbl->setText(QString::number(abs_rx));
     ui->lbl_absx->setText(QString::number(abs_x));
     ui->lbl_absy->setText(QString::number(abs_y));
-    qDebug() << abs_rx << abs_ry << abs_hat0x << abs_hat0y;
+    //qDebug() << abs_rx << abs_ry << abs_hat0x << abs_hat0y;
     if(cal.isKsetted())
     {
        short int x,y;
@@ -79,8 +80,10 @@ void MainWindow::update_data(QByteArray &data)
         cal.Do_Calibration(&x,&y);
         ui->lbl_absx_2->setText(QString::number(x));
         ui->lbl_absy_2->setText(QString::number(y));
-        if(uidev_opened)
+        if(uidev_opened&&((apply_event++)&0x01))
         {
+            qDebug() << time_elapsed.elapsed();
+            time_elapsed.start();
             //set values to virtual joystick
             events.set_axis(ABS_X,x); //calibrated absx
             events.set_axis(ABS_Y,y); //calibrated absy
@@ -261,7 +264,7 @@ void MainWindow::on_btn_run_clicked()
    }
 
        if(events.init_events_joy(QApplication::screens().at(0)->size().width(),
-                                 QApplication::screens().at(0)->size().height())<0)
+                                 QApplication::screens().at(0)->size().height(),ui->checkBox->isChecked())<0)
     {
         //error, no se ha abiero uidev
         uidev_opened=0;
