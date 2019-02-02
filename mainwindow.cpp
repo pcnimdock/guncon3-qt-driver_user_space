@@ -30,6 +30,7 @@ void MainWindow::update_data(QByteArray &data)
 {
     static unsigned char apply_event;
     static unsigned char key_pressed;
+     static unsigned char btn0_pressed;
     if(data.isEmpty())
     {
         timer->start();
@@ -87,6 +88,7 @@ void MainWindow::update_data(QByteArray &data)
             {
                 events.set_axis(ABS_X,x); //calibrated absx
                 events.set_axis(ABS_Y,y); //calibrated absy
+                events.syn_report();
                 if(key_pressed!=btn_trigger)
                 {
                     key_pressed=btn_trigger;
@@ -101,8 +103,10 @@ void MainWindow::update_data(QByteArray &data)
                    events.set_button(BTN_TOUCH,(int)btn_trigger);
                    events.syn_report();
 
-               }
+                 }
+
                 }
+
             }
             else
             {
