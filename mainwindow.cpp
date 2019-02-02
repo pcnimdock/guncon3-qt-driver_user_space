@@ -29,6 +29,7 @@ MainWindow::~MainWindow()
 void MainWindow::update_data(QByteArray &data)
 {
     static unsigned char apply_event;
+    static unsigned char key_pressed;
     if(data.isEmpty())
     {
         timer->start();
@@ -82,6 +83,29 @@ void MainWindow::update_data(QByteArray &data)
         ui->lbl_absy_2->setText(QString::number(y));
         if(uidev_opened&&((apply_event++)&0x01))
         {
+            if(ui->checkbox_mouse->isChecked())
+            {
+                events.set_axis(ABS_X,x); //calibrated absx
+                events.set_axis(ABS_Y,y); //calibrated absy
+                if(key_pressed!=btn_trigger)
+                {
+                    key_pressed=btn_trigger;
+               if(btn_trigger)
+               {
+
+                events.set_button(BTN_TOUCH,(int)btn_trigger);
+                events.syn_report();
+               }
+               else
+               {
+                   events.set_button(BTN_TOUCH,(int)btn_trigger);
+                   events.syn_report();
+
+               }
+                }
+            }
+            else
+            {
             qDebug() << time_elapsed.elapsed();
             time_elapsed.start();
             //set values to virtual joystick
@@ -103,6 +127,7 @@ void MainWindow::update_data(QByteArray &data)
             events.set_button(BTN_7,(int)btn_7);
             events.set_button(BTN_8,(int)btn_8);
             events.syn_report();
+            }
         }
 
     }
@@ -262,7 +287,18 @@ void MainWindow::on_btn_run_clicked()
    //error, cal not setted
        return;
    }
-
+if(ui->checkbox_mouse->isChecked())
+{
+    if(events.init_events_mouse(QApplication::screens().at(0)->size().width(),
+                              QApplication::screens().at(0)->size().height())<0)
+ {
+     //error, no se ha abiero uidev
+     uidev_opened=0;
+     return;
+ }
+}
+else
+{
        if(events.init_events_joy(QApplication::screens().at(0)->size().width(),
                                  QApplication::screens().at(0)->size().height(),ui->checkBox->isChecked())<0)
     {
@@ -270,6 +306,7 @@ void MainWindow::on_btn_run_clicked()
         uidev_opened=0;
         return;
     }
+}
     uidev_opened=1;
 
 }

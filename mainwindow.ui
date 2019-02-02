@@ -189,6 +189,19 @@
      <string>4:3</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkbox_mouse">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>130</y>
+      <width>65</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>mouse</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

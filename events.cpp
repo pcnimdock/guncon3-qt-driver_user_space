@@ -15,7 +15,38 @@ Events::Events()
 
 Events::~Events()
 {
-libevdev_uinput_destroy(uidev);
+    libevdev_uinput_destroy(uidev);
+}
+
+char Events::init_events_mouse(int width, int height)
+{
+    struct input_absinfo info;
+    info.minimum=0;
+    info.maximum=width;
+    info.resolution=1;
+    info.flat=0;
+    info.fuzz=0;
+    dev = libevdev_new();
+    libevdev_set_name(dev,"Guncon3Mouse");
+    libevdev_enable_event_code(dev,EV_ABS,ABS_X,&info);
+    info.minimum=0;
+    info.maximum=height;
+    libevdev_enable_event_code(dev,EV_ABS,ABS_Y,&info);
+    libevdev_enable_event_code(dev,EV_KEY,BTN_TOUCH,NULL);
+    libevdev_enable_property(dev,INPUT_PROP_DIRECT);
+    //BTN_{MOUSE,LEFT,MIDDLE,RIGHT}
+    //con lo anterior ya se debe de detectar como un touchscreen
+    int rc=libevdev_uinput_create_from_device(dev,LIBEVDEV_UINPUT_OPEN_MANAGED,&uidev);
+    libevdev_free(dev);
+    if(rc<0)
+    {
+        qDebug() << "Error al abrir uinput";
+        return(-1);
+    }
+    return(0);
+
+
+
 }
 
 char Events::init_events_joy(int max,int min,bool cb_4_3)
