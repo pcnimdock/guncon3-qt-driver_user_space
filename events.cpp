@@ -96,6 +96,7 @@ char Events::init_events_joy(int max,int min,bool cb_4_3)
     if(rc<0)
     {
         qDebug() << "Error al abrir uinput";
+
         return(-1);
     }
     return(0);

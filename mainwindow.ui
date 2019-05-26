@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>563</width>
+    <height>390</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Connect</string>
+     <string>Connect guncon</string>
     </property>
    </widget>
    <widget class="QComboBox" name="cb_guncon">
@@ -200,6 +200,91 @@
     </property>
     <property name="text">
      <string>mouse</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_guncon2">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>150</y>
+      <width>65</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>guncon2</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_ps2_cal">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>150</y>
+      <width>81</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ps2 calibration</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cb_serial">
+    <property name="geometry">
+     <rect>
+      <x>127</x>
+      <y>170</y>
+      <width>71</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_serial_connect">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>170</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Serial Connect</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="txt_log">
+    <property name="geometry">
+     <rect>
+      <x>173</x>
+      <y>300</y>
+      <width>211</width>
+      <height>70</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_conf">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>110</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>conf</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="trigger_r_button">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>230</y>
+      <width>74</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RadioButton</string>
     </property>
    </widget>
   </widget>

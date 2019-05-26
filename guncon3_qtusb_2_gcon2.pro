@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT += multimedia
+QT += multimedia serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,7 +13,7 @@ CONFIG += link_pkgconfig
 PKGCONFIG += libevdev
 LIBS += -levdev
 
-TARGET = guncon3_qtusb
+TARGET = guncon3_qtusb_2_gcon2
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use

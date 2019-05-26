@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QSerialPort>
 
 #include "guncon_usb.h"
 #include "calibration.h"
@@ -29,6 +30,10 @@ private slots:
 
     void on_btn_run_clicked();
 
+    void on_btn_serial_connect_clicked();
+
+    void data_rcv();
+
 private:
     Ui::MainWindow *ui;
     guncon_usb *gcon3;
@@ -43,6 +48,11 @@ private:
     bool uidev_opened;
     Events events;
     QElapsedTimer time_elapsed;
+    QSerialPort serial;
+    quint16 h_screen,w_screen;
+    bool send_guncon2;
+    QString serial_buffer;
+    qint16 var_offset_x;
 };
 
 #endif // MAINWINDOW_H

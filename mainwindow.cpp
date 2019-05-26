@@ -4,6 +4,9 @@
 #include <QSound>
 #include <QScreen>
 #include <QSize>
+#include <QMessageBox>
+#include <QSerialPortInfo>
+
 #include "calibration.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,6 +19,22 @@ MainWindow::MainWindow(QWidget *parent) :
     calibracion=0;
     uidev_opened=0;
     cal.reset();
+    send_guncon2=0;
+    var_offset_x=0;
+    QList <QSerialPortInfo> lista;
+    QSerialPortInfo *serial_info;
+    serial_info = new QSerialPortInfo();
+    lista = serial_info->availablePorts();
+    int i;
+    //this->mantener_pulsado=0;
+
+    if(lista.size()>0)
+    {
+        for(i=0;i<lista.size();i++)
+        {ui->cb_serial->addItem(lista.at(i).portName());}
+    }
+    delete(serial_info);
+
 
     gcon3 = new guncon_usb();
     timer = new QTimer;
@@ -26,6 +45,32 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//GCON2 defines
+#define BUTTON_TRIGGER	0x2000
+#define BUTTON_A		0x0008
+#define BUTTON_B		0x0004
+#define BUTTON_C		0x0002
+#define BUTTON_SELECT	0x4000
+#define BUTTON_START	0x8000
+#define DPAD_UP      	0x0010
+#define DPAD_DOWN		0x0040
+#define DPAD_LEFT 		0x0080
+#define DPAD_RIGHT      0x0020
+
+/*
+jstest
+button0 trigger
+1 a1
+2 a2
+3 b1
+4 b2
+5 c1
+6 c2
+7 stick a button
+8 stick b button
+9
+*/
+quint8 toongle_trigger=0;
 void MainWindow::update_data(QByteArray &data)
 {
     static unsigned char apply_event;
@@ -57,16 +102,16 @@ void MainWindow::update_data(QByteArray &data)
     abs_y=(dec_data.at(6)*256+dec_data.at(7)); //ABS_Y
     abs_x=(dec_data.at(8)*256+dec_data.at(9)); //ABS_X
     btn_trigger=((dec_data.at(11) & 0x20)?1:0); //BTN_TRIGGER
-    btn_0=((dec_data.at(12) & 0x04)?1:0);  //BTN 0
-    btn_1=((dec_data.at(12) & 0x02)?1:0);  //1
-    btn_2=((dec_data.at(11) & 0x04)?1:0);  //2
-    btn_3=((dec_data.at(11) & 0x02)?1:0);  //3
-    btn_4=((dec_data.at(11) & 0x80)?1:0);  //4
-    btn_5=((dec_data.at(12) & 0x08)?1:0);  //5
-    btn_6=((dec_data.at(10) & 0x80)?1:0);  //6
-    btn_7=((dec_data.at(10) & 0x40)?1:0);  //7
-    btn_8=((dec_data.at(11) & 0x10)?1:0);  // only one led reference
-    btn_9=((dec_data.at(11) & 0x08)?1:0);  // out of range
+    btn_0=((dec_data.at(12) & 0x04)?1:0);  //A1
+    btn_1=((dec_data.at(12) & 0x02)?1:0);  //A2
+    btn_2=((dec_data.at(11) & 0x04)?1:0);  //B1
+    btn_3=((dec_data.at(11) & 0x02)?1:0);  //B2
+    btn_4=((dec_data.at(11) & 0x80)?1:0);  //C1
+    btn_5=((dec_data.at(12) & 0x08)?1:0);  //C2
+    btn_6=((dec_data.at(10) & 0x80)?1:0);  //A STICK BUTTON
+    btn_7=((dec_data.at(10) & 0x40)?1:0);  //B STICK BUTTON
+    btn_9=((dec_data.at(11) & 0x10)?1:0);  // out of range
+    btn_8=((dec_data.at(11) & 0x08)?1:0);  // only one led reference ¿?
     //comprobar si está en modo de calibración
 
 
@@ -110,6 +155,8 @@ void MainWindow::update_data(QByteArray &data)
             }
             else
             {
+
+
             qDebug() << time_elapsed.elapsed();
             time_elapsed.start();
             //set values to virtual joystick
@@ -121,19 +168,85 @@ void MainWindow::update_data(QByteArray &data)
             events.set_axis(ABS_HAT0Y,abs_hat0y);
 
             events.set_button(BTN_TRIGGER,(int)btn_trigger);
-            events.set_button(BTN_0,(int)btn_0);
-            events.set_button(BTN_1,(int)btn_1);
-            events.set_button(BTN_2,(int)btn_2);
-            events.set_button(BTN_3,(int)btn_3);
-            events.set_button(BTN_4,(int)btn_4);
-            events.set_button(BTN_5,(int)btn_5);
-            events.set_button(BTN_6,(int)btn_6);
-            events.set_button(BTN_7,(int)btn_7);
-            events.set_button(BTN_8,(int)btn_8);
+            events.set_button(BTN_0,(int)btn_0); //A1
+            events.set_button(BTN_1,(int)btn_1); //A2
+            events.set_button(BTN_2,(int)btn_2); //B1
+            events.set_button(BTN_3,(int)btn_3); //B2
+            events.set_button(BTN_4,(int)btn_4); //C1
+            events.set_button(BTN_5,(int)btn_5); //C2
+            events.set_button(BTN_6,(int)btn_6); //A STICK BUTTON
+            events.set_button(BTN_7,(int)btn_7); //B STICK BUTTON
+            events.set_button(BTN_8,(int)btn_8); //undefined
             events.syn_report();
+
             }
         }
 
+        if(ui->checkBox_guncon2->isChecked()&&send_guncon2)
+        {
+            //hacer transformación de valores para guncon2
+            if(!serial.isOpen())
+            { //serialport no abierto
+                return;
+            }
+            quint16 x_g2,y_g2;
+            //hacer regla de 3
+            x_g2=((quint32)x)*640/w_screen;
+            y_g2=((quint32)y)*256/h_screen;
+            if(x_g2>640){x_g2=0;}
+            if(y_g2>256){y_g2=0;}
+            x_g2+=var_offset_x;
+            QByteArray mandar;
+            quint16 btn_g2;
+            /*
+#define BUTTON_TRIGGER	0x2000
+#define BUTTON_A		0x0008
+#define BUTTON_B		0x0004
+#define BUTTON_C		0x0002
+#define BUTTON_SELECT	0x4000
+#define BUTTON_START	0x8000
+#define DPAD_UP      	0x0010
+#define DPAD_DOWN		0x0040
+#define DPAD_LEFT 		0x0080
+#define DPAD_RIGHT      0x0020
+*/
+            btn_g2=0x1F00;
+            if(btn_trigger){btn_g2&=~((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(1);if(toongle_trigger>9){toongle_trigger=9;}else{toongle_trigger++;}}else{btn_g2|=((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(0);toongle_trigger=0;}
+            //btn_g2|=((quint16)(~btn_trigger))*BUTTON_TRIGGER;
+
+            if(btn_0){btn_g2&=~((quint16)BUTTON_A);}else{btn_g2|=((quint16)BUTTON_A);}
+
+            if(btn_1){btn_g2&=~((quint16)BUTTON_B);}else{btn_g2|=((quint16)BUTTON_B);}
+
+            if(btn_2){btn_g2&=~((quint16)BUTTON_C);}else{btn_g2|=((quint16)BUTTON_C);}
+
+            if(btn_3){btn_g2&=~((quint16)BUTTON_SELECT);}else{btn_g2|=((quint16)BUTTON_SELECT);}
+
+            if(btn_4){btn_g2&=~((quint16)BUTTON_START);}else{btn_g2|=((quint16)BUTTON_START);}
+            if(abs_ry<200){btn_g2|=DPAD_DOWN;}
+            if(abs_ry>25){btn_g2|=DPAD_UP;}
+            if(abs_rx<200){btn_g2|=DPAD_RIGHT;}
+            if(abs_rx>25){btn_g2|=DPAD_LEFT;}
+            if(btn_8)
+            {
+                x_g2=0;y_g2=0;
+            }
+           if((toongle_trigger==2))
+            {
+                x_g2=y_g2=0;
+
+            }
+            mandar.clear();
+            mandar.append(btn_g2&0xFF);
+            mandar.append(btn_g2>>8);
+            mandar.append(x_g2&0xFF);
+            mandar.append(x_g2>>8);
+            mandar.append(y_g2&0xFF);
+            mandar.append(y_g2>>8);
+            mandar.append(8);
+            serial.write(mandar);
+
+        }
     }
     if(calibracion)
     {
@@ -226,6 +339,9 @@ void MainWindow::on_btn_calibration_clicked()
     width_screen = resolucion->width();
     delete resolucion;
     int height_pix,width_pix;
+    h_screen=height_screen;
+    w_screen=width_screen;
+
     height_pix=height_screen/5;
     width_pix=height_pix;
     //el tamaño de la imagen de la mirilla será un quinto de la resolucion vertical
@@ -303,14 +419,74 @@ if(ui->checkbox_mouse->isChecked())
 }
 else
 {
-       if(events.init_events_joy(QApplication::screens().at(0)->size().width(),
+    if(ui->checkBox_guncon2->isChecked()==0)
+    {
+    if(events.init_events_joy(QApplication::screens().at(0)->size().width(),
                                  QApplication::screens().at(0)->size().height(),ui->checkBox->isChecked())<0)
     {
         //error, no se ha abiero uidev
         uidev_opened=0;
         return;
     }
+    }
+    else
+    {
+        uidev_opened=0;
+        send_guncon2=1;
+        return;
+    }
 }
     uidev_opened=1;
+
+}
+
+void MainWindow::on_btn_serial_connect_clicked()
+{
+    serial.setPortName(ui->cb_serial->currentText());
+    serial.setBaudRate(QSerialPort::Baud115200);
+    serial.setDataBits(QSerialPort::Data8);
+    serial.setParity(QSerialPort::NoParity);
+    //QByteArray nada;
+    if (!serial.open(QIODevice::ReadWrite)) {
+        //emit error(tr("Can't open %1, error code %2")
+        //           .arg(portName).arg(serial.error()),nada);
+        QMessageBox::warning(this, tr("Error de conexión"),
+                                      tr("No se ha podido conectar al puerto \n"
+                                         "%1, err %2").arg(ui->cb_serial->currentText()).arg(serial.errorString()),
+                                      QMessageBox::Ok );
+        return;
+    }
+    connect(&serial,SIGNAL(readyRead()),this,SLOT(data_rcv()));
+}
+
+
+void MainWindow::data_rcv()
+{
+
+    serial_buffer.append(serial.readAll());
+    if(serial_buffer.contains("\n", Qt::CaseInsensitive))
+    {
+        //esto es un comando completo
+        if(serial_buffer.contains("conf:", Qt::CaseInsensitive))
+        {
+            ui->lbl_conf->setText(serial_buffer);
+            //convert hex to int
+            QStringList temp_list;
+            serial_buffer.remove(0,serial_buffer.indexOf("conf:",Qt::CaseInsensitive));
+            temp_list=serial_buffer.split(" ");
+            qint16 var;
+            QString sep;
+           sep=temp_list.at(1);
+           bool ok;
+           var=sep.toInt(&ok,16);
+           var_offset_x=var*(-1)/2;
+        ui->txt_log->append(serial_buffer);
+        }
+        else
+        {
+            ui->txt_log->append(serial_buffer);
+        }
+    serial_buffer.clear();
+    }
 
 }
