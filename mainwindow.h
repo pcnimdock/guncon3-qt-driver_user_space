@@ -53,6 +53,7 @@ private:
     bool send_guncon2;
     QString serial_buffer;
     qint16 var_offset_x;
+    QByteArray mandar;
 };
 
 #endif // MAINWINDOW_H

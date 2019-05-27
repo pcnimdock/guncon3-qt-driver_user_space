@@ -78,6 +78,7 @@ void MainWindow::update_data(QByteArray &data)
      static unsigned char btn0_pressed;
     if(data.isEmpty())
     {
+        serial.write(mandar);
         timer->start();
         return;
     }
@@ -196,7 +197,7 @@ void MainWindow::update_data(QByteArray &data)
             if(x_g2>640){x_g2=0;}
             if(y_g2>256){y_g2=0;}
             x_g2+=var_offset_x;
-            QByteArray mandar;
+
             quint16 btn_g2;
             /*
 #define BUTTON_TRIGGER	0x2000
@@ -211,18 +212,18 @@ void MainWindow::update_data(QByteArray &data)
 #define DPAD_RIGHT      0x0020
 */
             btn_g2=0x1F00;
-            if(btn_trigger){btn_g2&=~((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(1);if(toongle_trigger>9){toongle_trigger=9;}else{toongle_trigger++;}}else{btn_g2|=((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(0);toongle_trigger=0;}
+            if(btn_trigger){btn_g2&=~((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(1);}else{btn_g2|=((quint16)BUTTON_TRIGGER);ui->trigger_r_button->setChecked(0);}
             //btn_g2|=((quint16)(~btn_trigger))*BUTTON_TRIGGER;
 
-            if(btn_0){btn_g2&=~((quint16)BUTTON_A);}else{btn_g2|=((quint16)BUTTON_A);}
+/*a1*/  if(btn_0){btn_g2&=~((quint16)BUTTON_A);}else{btn_g2|=((quint16)BUTTON_A);}
 
-            if(btn_1){btn_g2&=~((quint16)BUTTON_B);}else{btn_g2|=((quint16)BUTTON_B);}
+/*a2*/  if(btn_1){btn_g2&=~((quint16)BUTTON_B);}else{btn_g2|=((quint16)BUTTON_B);}
 
-            if(btn_2){btn_g2&=~((quint16)BUTTON_C);}else{btn_g2|=((quint16)BUTTON_C);}
+/*b1*/  if(btn_2){btn_g2&=~((quint16)BUTTON_C);}else{btn_g2|=((quint16)BUTTON_C);}
 
-            if(btn_3){btn_g2&=~((quint16)BUTTON_SELECT);}else{btn_g2|=((quint16)BUTTON_SELECT);}
+/*b2*/  if(btn_3){btn_g2&=~((quint16)BUTTON_SELECT);}else{btn_g2|=((quint16)BUTTON_SELECT);}
 
-            if(btn_4){btn_g2&=~((quint16)BUTTON_START);}else{btn_g2|=((quint16)BUTTON_START);}
+/*c1*/    if(btn_4){btn_g2&=~((quint16)BUTTON_START);}else{btn_g2|=((quint16)BUTTON_START);}
             if(abs_ry<200){btn_g2|=DPAD_DOWN;}
             if(abs_ry>25){btn_g2|=DPAD_UP;}
             if(abs_rx<200){btn_g2|=DPAD_RIGHT;}
@@ -231,11 +232,11 @@ void MainWindow::update_data(QByteArray &data)
             {
                 x_g2=0;y_g2=0;
             }
-           if((toongle_trigger==2))
-            {
-                x_g2=y_g2=0;
+//           if((toongle_trigger==2))
+//            {
+//                x_g2=y_g2=0;
 
-            }
+//            }
             mandar.clear();
             mandar.append(btn_g2&0xFF);
             mandar.append(btn_g2>>8);
@@ -243,7 +244,10 @@ void MainWindow::update_data(QByteArray &data)
             mandar.append(x_g2>>8);
             mandar.append(y_g2&0xFF);
             mandar.append(y_g2>>8);
-            mandar.append(8);
+            quint16 temp_var=0;
+            if(btn_8){temp_var=0xFE;}else{temp_var=0;}
+            if(btn_5){temp_var|=0x01;}
+            mandar.append(temp_var);
             serial.write(mandar);
 
         }
@@ -306,7 +310,7 @@ void MainWindow::on_btn_connect_clicked()
 
     connect(timer,SIGNAL(timeout()),gcon3,SLOT(new_read()));
     connect(gcon3,SIGNAL(new_readed_data(QByteArray&)),this,SLOT(update_data(QByteArray&)));
-    timer->setInterval(5);
+    timer->setInterval(8);
     timer->setSingleShot(true);
     QString value = "01126F3224601721";
     QByteArray array2 = QByteArray::fromHex(value.toLatin1());
