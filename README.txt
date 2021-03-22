@@ -11,3 +11,7 @@ git clone https://github.com/pcnimdock/guncon3-qt-driver_user_space.git
 cd guncon3-qt-driver_user_space
 make
 
+Dar permisos para que el usuario pueda manejar el uinput. Cambiar pcnimdock por el usuario correspondiente
+
+sudo setfacl -m user:pcnimdock:rw /dev/uinput
+
