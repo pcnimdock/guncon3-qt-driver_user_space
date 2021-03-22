@@ -1,3 +1,5 @@
+AppImage: https://github.com/pcnimdock/guncon3-qt-driver_user_space/releases/download/v0.0.1/guncon3_user_space--x86_64.AppImage
+
 Para poder compilar se necesita tener instalado Qt.
 
 En ubuntu 20.04
